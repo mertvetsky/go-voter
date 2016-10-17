@@ -1,3 +1,4 @@
-/main
-/pubkey.pem
+/config/pubkey.pem
 /.idea/
+/config/db.json
+/voter
