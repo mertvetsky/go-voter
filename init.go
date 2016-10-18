@@ -11,9 +11,6 @@ import (
 	"crypto/rsa"
 )
 
-
-
-
 var db *gorm.DB
 var publicKey *rsa.PublicKey
 
@@ -33,10 +30,12 @@ func initDb() {
 	if err != nil {
 		panic(err)
 	}
-	// Migrate the schema
 	//db.Create(&Entry{Value:"sigurd", Status:"new"})
-
+	db = db.Debug()
 	db.AutoMigrate(&Entry{})
+	db.AutoMigrate(&Vote{})
+	db.AutoMigrate(&User{})
+
 }
 
 func initKey() {

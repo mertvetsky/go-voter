@@ -7,7 +7,7 @@ import (
 	"github.com/dvsekhvalnov/jose2go"
 )
 
-type User struct {
+type AuthUser struct {
 	Id   int
 	Name string
 }
