@@ -1,0 +1,13 @@
+build:
+  image: golang:1.6
+  volumes:
+    - "./:/usr/src/vote"
+    - "./build.sh:/entrypoint.sh:ro"
+    - "$HOME/.ssh:/root/ssh:ro"
+  working_dir: /usr/src/vote
+  entrypoint: /entrypoint.sh
+  environment:
+    - "GOBIN=/usr/src/vote/bin"
+  command: bash -c 'go get -v && go build -v && ./vote'
+  ports:
+    - "8085:8085"
