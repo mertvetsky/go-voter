@@ -1,31 +1,41 @@
 package main
 
 import (
-	"github.com/kataras/iris"
 	"fmt"
-	"encoding/json"
-	"github.com/dvsekhvalnov/jose2go"
+	"github.com/dgrijalva/jwt-go"
+	"strconv"
+	"github.com/gin-gonic/gin"
 )
 
-type AuthUser struct {
-	Id   int
-	Name string
+const (
+	jwtName = "begetInnerJWT"
+)
+
+func getUser(c *gin.Context) (User) {
+	user := User{}
+	tokenString, err := c.Cookie(jwtName)
+
+	if err == nil && tokenString != "" {
+		token, _ := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+			if _, ok := token.Method.(*jwt.SigningMethodRSA); !ok {
+				return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
+			}
+			return publicKey, nil
+		})
+
+		if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+			parsedId, _ := strconv.Atoi(claims["uid"].(string))
+			db.FirstOrCreate(&user, User{Id: uint(parsedId), Name: claims["uname"].(string)})
+		}
+	}
+	return user
 }
 
-func getUser(ctx *iris.Context) (map[string]interface{}) {
-	token := ctx.GetCookie("hp_jwt")
-
-	payload, _, err := jose.Decode(token, publicKey)
-	var dat map[string]interface{}
-
-	if (err == nil) {
-		json.Unmarshal([]byte(payload), &dat)
-		//fmt.Printf("\npayload = %v\n", dat["uid"])
-		return dat
+func AuthMiddle(c *gin.Context) {
+	if getUser(c).Id == 0 {
+		c.JSON(403, ErrorAnswer{ErrorCode:403, ErrorDescription: "Уходи"})
+		c.Abort()
 	} else {
-		dat = map[string]interface{}{"error": 123}
-		fmt.Printf("%v", err)
+		c.Next()
 	}
-
-	return dat
 }

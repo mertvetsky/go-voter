@@ -7,7 +7,6 @@ import (
 	"github.com/dvsekhvalnov/jose2go/keys/rsa"
 	"encoding/json"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
-
 	"crypto/rsa"
 )
 

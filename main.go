@@ -1,19 +1,21 @@
 package main
 
 import (
-	"github.com/kataras/iris"
+	"github.com/gin-gonic/gin"
 )
 
 func main() {
 	initDb()
 	initKey()
-	iris.Get("/", actionIndex)
-	iris.Get("/user/:id", actionUserId)
-	iris.Get("/entry", actionEntry)
-	iris.Post("/entry", actionEntryAdd)
-	iris.Get("/entry/:id", actionEntryId)
-	iris.Get("/entry/:id/pro", actionEntryPro)
-	iris.Get("/entry/:id/con", actionEntryCon)
-	iris.StaticWeb("/js", "./static/js", 1)
-	iris.Listen(":8085")
+	router := gin.Default()
+	router.Use(AuthMiddle)
+	router.StaticFile("/", "./static/index.html")
+	router.GET("/user", actionUser)
+	router.GET("/entry", actionEntry)
+	router.POST("/entry", actionEntryAdd)
+	router.GET("/entry/:id", actionEntryId)
+	router.GET("/entry/:id/pro", actionVote(1))
+	router.GET("/entry/:id/con", actionVote(-1))
+	router.Static("/js", "./static/js")
+	router.Run(":8085")
 }

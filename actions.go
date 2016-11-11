@@ -1,53 +1,54 @@
 package main
 
 import (
-	"github.com/kataras/iris"
+	"fmt"
+	"github.com/gin-gonic/gin"
+	"strconv"
 )
 
-var myid uint = 35
-
-func actionIndex(ctx *iris.Context) {
-	ctx.ServeFile("./static/index.html", false)
+type ErrorAnswer struct {
+	ErrorCode        int
+	ErrorDescription string
 }
 
-func actionEntry(ctx *iris.Context) {
+func actionEntry(c *gin.Context) {
 	var entries []Entry
 	db.Preload("Votes.User").Find(&entries)
-	ctx.JSON(iris.StatusOK, entries)
+	c.JSON(200, entries)
 }
-func actionEntryAdd(ctx *iris.Context) {
+func actionEntryAdd(c *gin.Context) {
 	var body struct{ Value string `form:"value"` }
-	ctx.ReadJSON(&body)
+	c.BindJSON(&body)
 	db.Create(&Entry{Value: body.Value, Status: "new"})
 	var entry Entry
 	db.Preload("Votes.User").Where("value = ?", body.Value).Last(&entry)
-	ctx.JSON(iris.StatusOK, entry)
+	c.JSON(200, entry)
 }
 
-func actionEntryId(ctx *iris.Context) {
+func actionEntryId(c *gin.Context) {
 	var entry Entry
-	db.Preload("Votes.User").Last(&entry, ctx.Param("id"))
-	ctx.JSON(iris.StatusOK, entry)
-}
-func actionEntryPro(ctx *iris.Context) {
-	var entry Entry
-	entryId := ctx.Param("id")
-	db.Where("user_id = ? and entry_id = ?", myid, entryId).Delete(&Vote{})
-	db.Last(&entry, entryId).Association("Votes").Append(Vote{UserID:myid, Weight: 1})
-	db.Preload("Votes.User").Last(&entry, entryId)
-	ctx.JSON(iris.StatusOK, entry)
-}
-func actionEntryCon(ctx *iris.Context) {
-	var entry Entry
-	entryId := ctx.Param("id")
-	db.Where("user_id = ? and entry_id = ?", myid, entryId).Delete(&Vote{})
-	db.Last(&entry, entryId).Association("Votes").Append(Vote{UserID:myid, Weight: -1})
-	db.Preload("Votes.User").Last(&entry, entryId)
-	ctx.JSON(iris.StatusOK, entry)
+	db.Preload("Votes.User").Last(&entry, c.Param("id"))
+	c.JSON(200, entry)
 }
 
-func actionUserId(ctx *iris.Context) {
-	var user User
-	db.Last(&user, ctx.Param("id"))
-	ctx.JSON(iris.StatusOK, user)
+func actionUser(c *gin.Context) {
+	c.JSON(200, getUser(c))
+}
+
+func actionVote(weight int) func(*gin.Context) { // FP god
+	return func(c *gin.Context) {
+		var entry Entry
+		var vote Vote
+		parsedId, _ := strconv.Atoi(c.Param("id"))
+		id := uint(parsedId)
+
+		db.Find(&entry, Entry{Id: id})
+		if entry.Id == 0 {
+			c.JSON(404, ErrorAnswer{403, fmt.Sprintf("Entry %v not founded", c.Param("id"))})
+			return
+		}
+		db.Where(Vote{UserID:getUser(c).Id, EntryID:entry.Id}).Assign(Vote{Weight: weight}).FirstOrCreate(&vote)
+		db.Preload("Votes.User").Last(&entry, entry.Id)
+		c.JSON(200, entry)
+	}
 }

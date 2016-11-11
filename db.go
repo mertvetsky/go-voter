@@ -1,16 +1,13 @@
 package main
 
-import "github.com/jinzhu/gorm"
-
 type Entry struct {
-	gorm.Model
+	Id     uint
 	Status string
 	Value  string
 	Votes  []*Vote
 }
 
 type Vote struct {
-	gorm.Model
 	EntryID uint
 	UserID  uint
 	User    *User
@@ -18,7 +15,7 @@ type Vote struct {
 }
 
 type User struct {
-	gorm.Model
+	Id    uint
 	Votes []*Vote
 	Name  string
 }
