@@ -29,6 +29,7 @@
   "devDependencies": {
     "babel-eslint": "^7.1.1",
     "babelify": "^7.3.0",
+    "gulp": "gulpjs/gulp#4.0",
     "gulp-babel": "^6.1.2"
   },
   "optionalDependencies": {}

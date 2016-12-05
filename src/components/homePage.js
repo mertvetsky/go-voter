@@ -4,8 +4,7 @@ const Home = React.createClass({
   render () {
     return (
       <div className="jumbotron">
-        <h1>Pluralsight Administration</h1>
-        <p>React, React Router and Flux for ultra-responsive web apps.</p>
+        <h1>Голосоватор 3000</h1>
       </div>
     )
   }

@@ -1,8 +1,6 @@
 "use strict";
 
 var gulp = require('gulp');
-var connect = require('gulp-connect');
-var open = require('gulp-open');
 var browserify = require('browserify');
 var reactify = require('reactify');
 const babel = require('gulp-babel');
@@ -24,12 +22,9 @@ var config = {
   }
 };
 
-//start a local devserver
-
 gulp.task('html', function() {
   return gulp.src(config.paths.html)
-      .pipe(gulp.dest(config.paths.dist))
-      .pipe(connect.reload());
+      .pipe(gulp.dest(config.paths.dist));
 });
 
 gulp.task('js', function() {
@@ -60,7 +55,7 @@ gulp.task('lint', function() {
 
 gulp.task('watch', function() {
   gulp.watch(config.paths.html, gulp.series('html'));
-  gulp.watch(config.paths.mainJs, gulp.series('js', 'lint'));
+  gulp.watch(config.paths.js, gulp.series('js', 'lint'));
 });
 
 gulp.task('default', gulp.parallel('html', 'js', 'css', 'images', 'lint', 'watch'));

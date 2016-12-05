@@ -18,5 +18,6 @@ func main() {
 	router.GET("/entry/:id/con", actionVote(-1))
 	router.Static("/js", "./dist/scripts")
 	router.Static("/css", "./dist/css")
+	router.Static("/images", "./dist/images")
 	router.Run(":8085")
 }
